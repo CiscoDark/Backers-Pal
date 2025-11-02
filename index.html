@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bakers Pal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes gradient-animation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      
+      @keyframes fall-and-fade {
+        0% {
+          transform: translateY(-50px);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh);
+          opacity: 0;
+        }
+      }
+
+      .aurora-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+        background-size: 400% 400%;
+        animation: gradient-animation 15s ease infinite;
+        transition: background-image 0.5s ease-in-out;
+      }
+
+      :root {
+        --aurora-bg: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+        --color-primary: #4F46E5;
+        --color-primary-hover: #6366F1;
+        --color-secondary: #10B981;
+        --color-card-bg: rgba(255, 255, 255, 0.15);
+        --color-border-transparent: rgba(255, 255, 255, 0.2);
+        --color-inner-shadow-light: rgba(255, 255, 255, 0.6);
+        --color-inner-shadow-dark: rgba(0, 0, 0, 0.1);
+        --color-text-primary: #1F2937;
+        --color-text-secondary: #4B5563;
+        --color-background-solid: #F3F4F6;
+        --mouse-x: 50%;
+        --mouse-y: 50%;
+        --glow-rgb: 79, 70, 229;
+      }
+
+      .dark {
+        --aurora-bg: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #596a72);
+        --color-primary: #818CF8;
+        --color-primary-hover: #A5B4FC;
+        --color-secondary: #34D399;
+        --color-text-primary: #F9FAFB;
+        --color-text-secondary: #D1D5DB;
+        --color-background-solid: #111827;
+        --glow-rgb: 129, 140, 248;
+      }
+
+      .liquid-glass {
+        background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.1), transparent 40%), 
+                    var(--color-card-bg);
+        backdrop-filter: blur(25px) saturate(150%);
+        -webkit-backdrop-filter: blur(25px) saturate(150%);
+        box-shadow: inset 0.5px 1px 1px var(--color-inner-shadow-light), 
+                    inset -1px -1px 2px var(--color-inner-shadow-dark),
+                    0 8px 25px rgba(0,0,0,0.1);
+        border: 1px solid var(--color-border-transparent);
+        transition: background 0.3s ease-out;
+      }
+      
+      .interactive-press:active {
+        transform: scale(0.97);
+        transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+
+      body {
+        background-color: var(--color-background-solid);
+      }
+      
+      * {
+        transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            borderRadius: {
+              '4xl': '2rem',
+            },
+            boxShadow: {
+                'glow-primary': '0 0 15px 0 rgba(var(--glow-rgb), 0.4)',
+                'glow-primary-hover': '0 0 25px 0 rgba(var(--glow-rgb), 0.6)',
+            },
+            colors: {
+              'primary': 'var(--color-primary)',
+              'primary-hover': 'var(--color-primary-hover)',
+              'secondary': 'var(--color-secondary)',
+              'background': 'transparent', // Main background is transparent to show aurora
+              'card': 'var(--color-card-bg)', // Not used directly, liquid-glass class is preferred
+              'text-primary': 'var(--color-text-primary)',
+              'text-secondary': 'var(--color-text-secondary)',
+              'border': 'var(--color-border-transparent)',
+              'solid-background': 'var(--color-background-solid)',
+            },
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="aurora" class="aurora-background"></div>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      // Script to set the initial theme class and background gradient
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        // Determine if dark mode should be on, defaulting to user's system preference
+        const isDark = savedTheme ? JSON.parse(savedTheme) === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Apply the 'dark' class to the html element to prevent FOUC
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+
+        // Set the initial background gradient based on theme
+        const auroraDiv = document.getElementById('aurora');
+        const lightBg = 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)';
+        const darkBg = 'linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #596a72)';
+
+        if (auroraDiv) {
+          auroraDiv.style.backgroundImage = isDark ? darkBg : lightBg;
+        }
+      })();
+    </script>
+  </body>
+</html>

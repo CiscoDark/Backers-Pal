@@ -1,0 +1,5 @@
+{
+  "name": "Bakers Pal",
+  "description": "An application to help calculate profit margins and gains for a baking business. Users can manage ingredient prices, define recipes, and track daily sales to get accurate profit calculations and business insights.",
+  "requestFramePermissions": []
+}
