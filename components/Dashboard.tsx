@@ -1,11 +1,11 @@
 
 import React, { useState, useMemo, useRef } from 'react';
-import { Ingredient, Sale, Recipe } from '../types';
-import { CURRENCY_SYMBOL } from '../constants';
-import { getBusinessTips } from '../services/geminiService';
-import { SparkleIcon } from './Icons';
-import { BarChart } from './Charts';
-import { vibrate } from '../utils/haptics';
+import { Ingredient, Sale, Recipe } from '../types.ts';
+import { CURRENCY_SYMBOL } from '../constants.ts';
+import { getBusinessTips } from '../services/geminiService.ts';
+import { SparkleIcon } from './Icons.tsx';
+import { BarChart } from './Charts.tsx';
+import { vibrate } from '../utils/haptics.ts';
 
 interface DashboardProps {
   totalRevenue: number;

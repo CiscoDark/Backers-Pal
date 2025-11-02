@@ -1,8 +1,7 @@
 
-
 import React from 'react';
-import { CloseIcon } from './Icons';
-import { vibrate } from '../utils/haptics';
+import { CloseIcon } from './Icons.tsx';
+import { vibrate } from '../utils/haptics.ts';
 
 interface ModalProps {
   isOpen: boolean;

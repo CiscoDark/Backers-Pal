@@ -1,11 +1,10 @@
 
-
 import React, { useState, useRef } from 'react';
-import { Ingredient } from '../types';
-import { PlusIcon, TrashIcon, PencilIcon, HistoryIcon } from './Icons';
-import { CURRENCY_SYMBOL } from '../constants';
-import Modal from './Modal';
-import { vibrate } from '../utils/haptics';
+import { Ingredient } from '../types.ts';
+import { PlusIcon, TrashIcon, PencilIcon, HistoryIcon } from './Icons.tsx';
+import { CURRENCY_SYMBOL } from '../constants.ts';
+import Modal from './Modal.tsx';
+import { vibrate } from '../utils/haptics.ts';
 
 interface IngredientsProps {
   ingredients: Ingredient[];

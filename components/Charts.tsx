@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { CURRENCY_SYMBOL } from '../constants';
-import { vibrate } from '../utils/haptics';
+import { CURRENCY_SYMBOL } from '../constants.ts';
+import { vibrate } from '../utils/haptics.ts';
 
 // Bar Chart Component
 interface BarChartData {

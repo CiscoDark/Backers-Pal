@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sale, Recipe } from '../types';
-import { PlusIcon, TrashIcon, CheckCircleIcon } from './Icons';
-import { CURRENCY_SYMBOL } from '../constants';
-import Modal from './Modal';
-import { vibrate } from '../utils/haptics';
+import { Sale, Recipe } from '../types.ts';
+import { PlusIcon, TrashIcon, CheckCircleIcon } from './Icons.tsx';
+import { CURRENCY_SYMBOL } from '../constants.ts';
+import Modal from './Modal.tsx';
+import { vibrate } from '../utils/haptics.ts';
 
 interface SalesProps {
   sales: Sale[];

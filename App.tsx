@@ -1,14 +1,14 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useLocalStorage } from './hooks/useLocalStorage';
-import { Ingredient, Sale, View, Note, Recipe } from './types';
-import { DashboardIcon, IngredientsIcon, NotesIcon, SalesIcon, MoonIcon, SunIcon, RecipeAssistantIcon, RecipeIcon } from './components/Icons';
-import Dashboard from './components/Dashboard';
-import Ingredients from './components/Ingredients';
-import { Notes, RecipeAssistant } from './components/Recipe';
-import Recipes from './components/Recipes';
-import Sales from './components/Sales';
-import { vibrate } from './utils/haptics';
+import { useLocalStorage } from './hooks/useLocalStorage.ts';
+import { Ingredient, Sale, View, Note, Recipe } from './types.ts';
+import { DashboardIcon, IngredientsIcon, NotesIcon, SalesIcon, MoonIcon, SunIcon, RecipeAssistantIcon, RecipeIcon } from './components/Icons.tsx';
+import Dashboard from './components/Dashboard.tsx';
+import Ingredients from './components/Ingredients.tsx';
+import { Notes, RecipeAssistant } from './components/Recipe.tsx';
+import Recipes from './components/Recipes.tsx';
+import Sales from './components/Sales.tsx';
+import { vibrate } from './utils/haptics.ts';
 
 // ThemeToggle Component
 const ThemeToggle: React.FC<{ theme: 'light' | 'dark'; setTheme: (theme: 'light' | 'dark') => void }> = ({ theme, setTheme }) => {

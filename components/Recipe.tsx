@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Note } from '../types';
-import { PlusIcon, TrashIcon, SparkleIcon } from './Icons';
-import { vibrate } from '../utils/haptics';
-import { getRecipeSuggestion } from '../services/geminiService';
+import { Note } from '../types.ts';
+import { PlusIcon, TrashIcon, SparkleIcon } from './Icons.tsx';
+import { vibrate } from '../utils/haptics.ts';
+import { getRecipeSuggestion } from '../services/geminiService.ts';
 
 interface NotesProps {
   notes: Note[];

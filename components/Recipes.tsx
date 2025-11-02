@@ -1,10 +1,10 @@
 
 import React, { useState, useMemo } from 'react';
-import { Recipe, Ingredient, RecipeIngredient } from '../types';
-import { PlusIcon, TrashIcon, PencilIcon, CloseIcon } from './Icons';
-import { CURRENCY_SYMBOL } from '../constants';
-import Modal from './Modal';
-import { vibrate } from '../utils/haptics';
+import { Recipe, Ingredient, RecipeIngredient } from '../types.ts';
+import { PlusIcon, TrashIcon, PencilIcon, CloseIcon } from './Icons.tsx';
+import { CURRENCY_SYMBOL } from '../constants.ts';
+import Modal from './Modal.tsx';
+import { vibrate } from '../utils/haptics.ts';
 
 interface RecipesProps {
   recipes: Recipe[];
