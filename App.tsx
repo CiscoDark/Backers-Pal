@@ -5,7 +5,7 @@ import { Ingredient, Sale, View, Note, Recipe } from './types';
 import { DashboardIcon, IngredientsIcon, NotesIcon, SalesIcon, MoonIcon, SunIcon, RecipeAssistantIcon, RecipeIcon } from './components/Icons';
 import Dashboard from './components/Dashboard';
 import Ingredients from './components/Ingredients';
-import Notes, { RecipeAssistant } from './components/Recipe';
+import { Notes, RecipeAssistant } from './components/Recipe';
 import Recipes from './components/Recipes';
 import Sales from './components/Sales';
 import { vibrate } from './utils/haptics';

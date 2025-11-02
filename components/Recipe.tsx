@@ -10,7 +10,7 @@ interface NotesProps {
   setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
 }
 
-const Notes: React.FC<NotesProps> = ({ notes, setNotes }) => {
+export const Notes: React.FC<NotesProps> = ({ notes, setNotes }) => {
   const [newNote, setNewNote] = useState('');
 
   const handleAddNote = () => {
@@ -83,7 +83,6 @@ const Notes: React.FC<NotesProps> = ({ notes, setNotes }) => {
   );
 };
 
-export default Notes;
 
 // --- New RecipeAssistant Component ---
 export const RecipeAssistant: React.FC = () => {
