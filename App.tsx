@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useLocalStorage } from './hooks/useLocalStorage.ts';
+import { useCookieStorage } from './hooks/useCookieStorage.ts';
 import { Ingredient, Sale, View, Note, Recipe } from './types.ts';
 import { DashboardIcon, IngredientsIcon, NotesIcon, SalesIcon, MoonIcon, SunIcon, RecipeAssistantIcon, RecipeIcon } from './components/Icons.tsx';
 import Dashboard from './components/Dashboard.tsx';
@@ -9,6 +9,55 @@ import { Notes, RecipeAssistant } from './components/Recipe.tsx';
 import Recipes from './components/Recipes.tsx';
 import Sales from './components/Sales.tsx';
 import { vibrate } from './utils/haptics.ts';
+
+// --- URL State Management ---
+interface AppState {
+  ingredients: Ingredient[];
+  recipes: Recipe[];
+  sales: Sale[];
+  notes: Note[];
+}
+
+// Unicode-safe Base64 encoding/decoding
+function utoa(str: string): string {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function atou(b64: string): string {
+  return decodeURIComponent(escape(atob(b64)));
+}
+
+const getInitialState = (): AppState => {
+  try {
+    const search = window.location.hash.split('?')[1];
+    if (search) {
+      const params = new URLSearchParams(search);
+      const data = params.get('data');
+      if (data) {
+        const decodedJson = atou(data); // Use unicode-safe decoder
+        const parsedState = JSON.parse(decodedJson);
+        // Basic validation to ensure we have the expected structure
+        if (
+          'ingredients' in parsedState &&
+          'recipes' in parsedState &&
+          'sales' in parsedState &&
+          'notes' in parsedState
+        ) {
+          return parsedState;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Failed to parse state from URL hash:", error);
+  }
+  // Return default empty state if hash is invalid or not present
+  return {
+    ingredients: [],
+    recipes: [],
+    sales: [],
+    notes: [],
+  };
+};
+
 
 // ThemeToggle Component
 const ThemeToggle: React.FC<{ theme: 'light' | 'dark'; setTheme: (theme: 'light' | 'dark') => void }> = ({ theme, setTheme }) => {
@@ -31,28 +80,53 @@ const ThemeToggle: React.FC<{ theme: 'light' | 'dark'; setTheme: (theme: 'light'
 
 // Main App Component
 const App: React.FC = () => {
-  const [currentHash, setCurrentHash] = useState(window.location.hash);
-  const [ingredients, setIngredients] = useLocalStorage<Ingredient[]>('ingredients', []);
-  const [recipes, setRecipes] = useLocalStorage<Recipe[]>('recipes', []);
-  const [sales, setSales] = useLocalStorage<Sale[]>('sales', []);
-  const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
-  const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
+  const [currentHash, setCurrentHash] = useState(window.location.hash.split('?')[0]);
+  
+  const initialState = getInitialState();
+  const [ingredients, setIngredients] = useState<Ingredient[]>(initialState.ingredients);
+  const [recipes, setRecipes] = useState<Recipe[]>(initialState.recipes);
+  const [sales, setSales] = useState<Sale[]>(initialState.sales);
+  const [notes, setNotes] = useState<Note[]>(initialState.notes);
+  const [theme, setTheme] = useCookieStorage<'light' | 'dark'>('theme', 'light');
   
   // Easter egg state
   const [hearts, setHearts] = useState<{ id: number; style: React.CSSProperties; content: string }[]>([]);
   const tapCountRef = useRef(0);
-  // Fix: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialLoad = useRef(true);
 
-  const view: View = (currentHash.replace('#/', '') || 'dashboard') as View;
+  // This effect synchronizes the app state to the URL hash
+  useEffect(() => {
+    // We skip the first render to avoid an unnecessary URL update on load
+    if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        return;
+    }
+      
+    const appState: AppState = { ingredients, recipes, sales, notes };
+    const jsonState = JSON.stringify(appState);
+    const base64State = utoa(jsonState); // Use unicode-safe encoder
+    
+    // Get the current view from the hash
+    const currentView = currentHash.replace('#/', '') || 'dashboard';
+    const newHash = `#/${currentView}?data=${base64State}`;
+    
+    // Use replaceState to avoid cluttering browser history
+    history.replaceState(null, '', newHash);
 
+  }, [ingredients, recipes, sales, notes, currentHash]);
+
+  // This effect handles navigation (view changes)
   useEffect(() => {
     const handleHashChange = () => {
-      setCurrentHash(window.location.hash);
+        const newHash = window.location.hash.split('?')[0] || '#/dashboard';
+        setCurrentHash(newHash);
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  const view: View = (currentHash.replace('#/', '') || 'dashboard') as View;
 
   // Effect to track mouse for liquid glass effect
   useEffect(() => {
@@ -83,34 +157,6 @@ const App: React.FC = () => {
       if (aurora) aurora.style.backgroundImage = lightBg;
     }
   }, [theme]);
-  
-  // One-time data migrations for users with old data structure
-  useEffect(() => {
-    // Migration for Ingredient.price -> Ingredient.priceHistory
-    const requiresPriceMigration = ingredients.some(ing => 'price' in ing && !('priceHistory' in ing));
-    if (requiresPriceMigration) {
-      const migratedIngredients = ingredients.map(ing => {
-        if ('price' in ing && !('priceHistory' in ing)) {
-          const newIng: any = { ...(ing as any) };
-          newIng.priceHistory = [{ date: new Date().toISOString(), price: newIng.price }];
-          delete newIng.price;
-          return newIng as Ingredient;
-        }
-        return ing;
-      });
-      setIngredients(migratedIngredients);
-    }
-    
-    // Migration for Sale to add paymentStatus
-    const salesNeedMigration = sales.some(s => !('paymentStatus' in s));
-    if (salesNeedMigration) {
-        const migratedSales = sales.map(s => ({
-            ...s,
-            paymentStatus: 'paid', // Default old sales to 'paid'
-        }));
-        setSales(migratedSales as Sale[]);
-    }
-  }, [ingredients, setIngredients, sales, setSales]);
 
   const { totalRevenue, totalUnitsSold } = useMemo(() => {
     const totalRevenue = sales.reduce((sum, sale) => sum + sale.quantity * sale.pricePerUnit, 0);
@@ -125,7 +171,6 @@ const App: React.FC = () => {
     const newHearts = Array.from({ length: 30 }).map((_, i) => ({
       id: i + Date.now(),
       content: heartEmojis[Math.floor(Math.random() * heartEmojis.length)],
-      // Fix: Added a type assertion to the style object to match React.CSSProperties.
       style: {
         left: `${Math.random() * 100}%`,
         animation: `fall-and-fade ${Math.random() * 2 + 3}s ${Math.random() * 2}s linear forwards`,
@@ -192,6 +237,8 @@ const App: React.FC = () => {
     { href: '#/notes', label: 'Notes', icon: <NotesIcon className="h-6 w-6" /> },
     { href: '#/recipe-assistant', label: 'AI Assistant', icon: <RecipeAssistantIcon className="h-6 w-6" /> },
   ];
+  
+  const currentViewHref = `#/${view}`;
 
   return (
     <div className="flex h-screen bg-transparent text-text-primary">
@@ -212,7 +259,7 @@ const App: React.FC = () => {
         </div>
         <ul>
             {navItems.map(item => (
-                <SideNavItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={'#/' + view === item.href} />
+                <SideNavItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={currentViewHref === item.href} />
             ))}
         </ul>
         <div className="mt-auto p-4 bg-black/5 rounded-2xl text-center">
@@ -233,7 +280,7 @@ const App: React.FC = () => {
       {/* Bottom Nav for Mobile */}
       <nav className="md:hidden fixed bottom-3 left-3 right-3 liquid-glass flex justify-around p-1 rounded-2xl z-10">
          {navItems.map(item => (
-            <BottomNavItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={'#/' + view === item.href} />
+            <BottomNavItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={currentViewHref === item.href} />
         ))}
       </nav>
     </div>
@@ -248,14 +295,22 @@ interface NavItemProps {
   isActive: boolean;
 }
 
+const updateHash = (newHash: string) => {
+    const currentHash = window.location.hash.split('?')[0];
+    if (currentHash !== newHash) {
+        // Preserve existing query parameters (like our data)
+        const search = window.location.hash.split('?')[1];
+        window.location.hash = search ? `${newHash}?${search}` : newHash;
+    }
+};
+
+
 // SideNavItem Component for desktop sidebar
 const SideNavItem: React.FC<NavItemProps> = ({ icon, label, href, isActive }) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     vibrate();
-    if (window.location.hash !== href) {
-        window.location.hash = href;
-    }
+    updateHash(href);
   };
 
   return (
@@ -281,9 +336,7 @@ const BottomNavItem: React.FC<Omit<NavItemProps, 'onClick'>> = ({ icon, label, h
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     vibrate();
-    if (window.location.hash !== href) {
-        window.location.hash = href;
-    }
+    updateHash(href);
   };
 
   return (

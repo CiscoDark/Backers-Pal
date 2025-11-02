@@ -74,7 +74,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, [sales]);
 
   const profitMarginChartData = useMemo(() => {
-    const ingredientPriceMap = new Map(ingredients.map(ing => [ing.id, getCurrentPrice(ing) / ing.quantity]));
+    const ingredientPriceMap = new Map(ingredients.map(ing => [ing.id, ing.quantity > 0 ? getCurrentPrice(ing) / ing.quantity : 0]));
     const recipeCostMap = new Map(recipes.map(recipe => {
         const cost = recipe.ingredients.reduce((acc, ri) => {
             const pricePerUnit = ingredientPriceMap.get(ri.ingredientId) || 0;

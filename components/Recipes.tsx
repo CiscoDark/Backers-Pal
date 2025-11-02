@@ -151,11 +151,12 @@ const RecipeFormModal: React.FC<RecipeFormModalProps> = ({ isOpen, onClose, onSa
   };
 
   const handleSave = () => {
-    if (name && sellingPrice && recipeIngredients.every(ri => ri.ingredientId && ri.quantity > 0)) {
+    const price = parseFloat(sellingPrice);
+    if (name && !isNaN(price) && recipeIngredients.every(ri => ri.ingredientId && ri.quantity > 0)) {
       onSave({
         id: recipe?.id || '',
         name,
-        sellingPrice: parseFloat(sellingPrice),
+        sellingPrice: price,
         ingredients: recipeIngredients,
       });
     } else {

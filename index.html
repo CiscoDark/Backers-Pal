@@ -132,13 +132,30 @@
     <div id="aurora" class="aurora-background"></div>
     <div id="root"></div>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script type="text/babel" data-presets="react,typescript" data-type="module" src="/index.tsx"></script>
+    <script type="text/babel" data-presets="react,typescript" data-type="module" src="index.tsx"></script>
     <script>
-      // Script to set the initial theme class and background gradient
+      // Script to set the initial theme class and background gradient from cookie
       (function() {
-        const savedTheme = localStorage.getItem('theme');
-        // Determine if dark mode should be on, defaulting to user's system preference
-        const isDark = savedTheme ? JSON.parse(savedTheme) === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // Function to get a cookie
+        const getCookie = (name) => {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) {
+                    try {
+                        return JSON.parse(decodeURIComponent(c.substring(nameEQ.length,c.length)));
+                    } catch(e) {
+                        return null;
+                    }
+                }
+            }
+            return null;
+        };
+
+        const savedTheme = getCookie('theme');
+        const isDark = savedTheme !== null ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
         
         // Apply the 'dark' class to the html element to prevent FOUC
         if (isDark) {
