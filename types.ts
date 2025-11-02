@@ -31,6 +31,7 @@ export interface Sale {
   quantity: number; // How many units were sold
   pricePerUnit: number;
   customer?: string;
+  paymentStatus: 'paid' | 'credit';
 }
 
 export interface Note {

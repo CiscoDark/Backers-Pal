@@ -84,9 +84,9 @@ const App: React.FC = () => {
     }
   }, [theme]);
   
-  // One-time data migration for users with old data structure
+  // One-time data migrations for users with old data structure
   useEffect(() => {
-    // Migration for price -> priceHistory
+    // Migration for Ingredient.price -> Ingredient.priceHistory
     const requiresPriceMigration = ingredients.some(ing => 'price' in ing && !('priceHistory' in ing));
     if (requiresPriceMigration) {
       const migratedIngredients = ingredients.map(ing => {
@@ -100,7 +100,17 @@ const App: React.FC = () => {
       });
       setIngredients(migratedIngredients);
     }
-  }, [ingredients, setIngredients]);
+    
+    // Migration for Sale to add paymentStatus
+    const salesNeedMigration = sales.some(s => !('paymentStatus' in s));
+    if (salesNeedMigration) {
+        const migratedSales = sales.map(s => ({
+            ...s,
+            paymentStatus: 'paid', // Default old sales to 'paid'
+        }));
+        setSales(migratedSales as Sale[]);
+    }
+  }, [ingredients, setIngredients, sales, setSales]);
 
   const { totalRevenue, totalUnitsSold } = useMemo(() => {
     const totalRevenue = sales.reduce((sum, sale) => sum + sale.quantity * sale.pricePerUnit, 0);
